@@ -35,5 +35,4 @@ def test_simplejwt(no_warnings):
 
     generator = SchemaGenerator(patterns=urlpatterns)
     schema = generator.get_schema(request=None, public=True)
-
     assert_schema(schema, 'tests/contrib/test_simplejwt.yml')
