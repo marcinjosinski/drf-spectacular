@@ -24,22 +24,32 @@ class SimpleJWTScheme(OpenApiAuthenticationExtension):
         }
 
 
-class FixSimpleJWTTokenRefreshView(OpenApiViewExtension):
+class SimpleJWTTokenRefreshView(OpenApiViewExtension):
     target_class = 'rest_framework_simplejwt.views.TokenRefreshView'
 
     def view_replacement(self):
-        from rest_framework_simplejwt.serializers import TokenRefreshSerializer
-
-        class TokenRefreshResponse(serializers.Serializer):
+        class TokenRefreshResponseSerializer(serializers.Serializer):
             access = serializers.CharField()
 
         class Fixed(self.target_class):
-            serializer_class = TokenRefreshSerializer
-
-            @extend_schema(
-                request=TokenRefreshSerializer,
-                responses=TokenRefreshResponse,
-            )
+            @extend_schema(responses=TokenRefreshResponseSerializer)
             def post(self, request, *args, **kwargs):
-                pass
+                pass  # pragma: no cover
+
+        return Fixed
+
+
+class SimpleJWTTokenObtainPairView(OpenApiViewExtension):
+    target_class = 'rest_framework_simplejwt.views.TokenObtainPairView'
+
+    def view_replacement(self):
+        class TokenObtainPairResponseSerializer(serializers.Serializer):
+            access = serializers.CharField()
+            refresh = serializers.CharField()
+
+        class Fixed(self.target_class):
+            @extend_schema(responses=TokenObtainPairResponseSerializer)
+            def post(self, request, *args, **kwargs):
+                pass  # pragma: no cover
+
         return Fixed
