@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import serializers
 
 from drf_spectacular.drainage import warn
@@ -28,8 +29,13 @@ class SimpleJWTTokenRefreshView(OpenApiViewExtension):
     target_class = 'rest_framework_simplejwt.views.TokenRefreshView'
 
     def view_replacement(self):
-        class TokenRefreshResponseSerializer(serializers.Serializer):
-            access = serializers.CharField()
+        if getattr(settings, 'ROTATE_REFRESH_TOKENS', False):
+            class TokenRefreshResponseSerializer(serializers.Serializer):
+                access = serializers.CharField()
+                refresh = serializers.CharField()
+        else:
+            class TokenRefreshResponseSerializer(serializers.Serializer):
+                access = serializers.CharField()
 
         class Fixed(self.target_class):
             @extend_schema(responses=TokenRefreshResponseSerializer)
