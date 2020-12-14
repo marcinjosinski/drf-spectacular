@@ -29,7 +29,7 @@ class SimpleJWTTokenRefreshView(OpenApiViewExtension):
     target_class = 'rest_framework_simplejwt.views.TokenRefreshView'
 
     def view_replacement(self):
-        if getattr(settings, 'ROTATE_REFRESH_TOKENS', False):
+        if getattr(settings, 'SIMPLE_JWT', {}).get('ROTATE_REFRESH_TOKENS', False):
             class TokenRefreshResponseSerializer(serializers.Serializer):
                 access = serializers.CharField()
                 refresh = serializers.CharField()
@@ -55,6 +55,21 @@ class SimpleJWTTokenObtainPairView(OpenApiViewExtension):
 
         class Fixed(self.target_class):
             @extend_schema(responses=TokenObtainPairResponseSerializer)
+            def post(self, request, *args, **kwargs):
+                pass  # pragma: no cover
+
+        return Fixed
+
+
+class SimpleJWTTokenObtainSlidingView(OpenApiViewExtension):
+    target_class = 'rest_framework_simplejwt.views.TokenObtainSlidingView'
+
+    def view_replacement(self):
+        class SlidingTokenSerializer(serializers.Serializer):
+            token = serializers.CharField()
+
+        class Fixed(self.target_class):
+            @extend_schema(responses=SlidingTokenSerializer)
             def post(self, request, *args, **kwargs):
                 pass  # pragma: no cover
 
